@@ -1,0 +1,19 @@
+_Activity đăng ký:
+onCreate:
+	// Đăng ký EventBus
+        EventBus.getDefault().register(this)
+
+onStop:
+	// Hủy đăng ký EventBus
+        EventBus.getDefault().unregister(this)
+
+Sự kiện:
+	@Subscribe(threadMode = ThreadMode.MAIN)
+    fun onMessageEvent(event: MessageEvent) {
+        // Nhận được sự kiện, cập nhật UI hoặc thực hiện hành động
+        Toast.makeText(requireContext(), "Message: ${event.message}", Toast.LENGTH_SHORT).show()
+    }
+
+
+Bên gửi:
+	EventBus.getDefault().post(MessageEvent("Hello from Activity!"))
