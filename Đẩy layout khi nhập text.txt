@@ -1,0 +1,38 @@
+_ themes.xml:
+	<style name="Base.Theme.ST070" parent="Theme.Material3.DayNight.NoActionBar">
+	        <item name="android:windowTranslucentStatus">false</item>
+        	<item name="android:statusBarColor">@android:color/transparent</item>
+	</style>
+
+_ baseActivity:
+	fun initWindow() {
+	        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or 
+			View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or 
+			View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or 
+			View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+	}
+
+_ fileCode:
+	private var originalMarginBottom: Int = 0
+	var layoutParams: ConstraintLayout.LayoutParams? = null
+	layoutParams = binding.layoutText.layoutParams as ConstraintLayout.LayoutParams
+	
+	binding.root.viewTreeObserver.addOnGlobalLayoutListener {
+            val rect = Rect()
+            binding.root.getWindowVisibleDisplayFrame(rect)
+            val screenHeight = binding.root.height
+            val keypadHeight = screenHeight - rect.bottom
+            val isKeyboardNowVisible = keypadHeight > screenHeight * 0.15
+            if (!isKeyboardNowVisible) {
+                layoutParams!!.bottomMargin = originalMarginBottom
+                binding.layoutText.layoutParams = layoutParams
+            } else {
+                layoutParams!!.bottomMargin = dpToPx(150)
+                binding.layoutText.layoutParams = layoutParams
+            }
+        }
+
+	private fun dpToPx(dp: Int): Int {
+        	val density = resources.displayMetrics.density
+	        return (dp * density).toInt()
+	}
