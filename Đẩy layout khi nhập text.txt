@@ -3,7 +3,12 @@ _ themes.xml:
 	        <item name="android:windowTranslucentStatus">false</item>
         	<item name="android:statusBarColor">@android:color/transparent</item>
 	</style>
-
+_ manifest:
+	<activity
+            android:name=".ui.CustomActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
 _ baseActivity:
 	fun initWindow() {
 	        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or 
