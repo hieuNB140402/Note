@@ -2,15 +2,28 @@
     private fun saveBitmapToExternalStorage(bitmap: Bitmap) {
         val resolver = contentResolver
         val imageCollection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Scoped Storage (Android 10+)
             MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
         } else {
+            // Direct access (Android 9 and below)
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         }
 
         val contentValues = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, "image_${System.currentTimeMillis()}.png")
             put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/AR") // For Android 10+ (Scoped Storage)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Scoped Storage for Android 10+
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/BabyPhoto")
+            } else {
+                // Path for Android 9 and below
+                val imageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString() + "/BabyPhoto"
+                val file = File(imageDir)
+                if (!file.exists()) {
+                    file.mkdirs() // Tạo thư mục nếu chưa tồn tại
+                }
+                put(MediaStore.Images.Media.DATA, "$imageDir/image_${System.currentTimeMillis()}.png")
+            }
         }
 
         val imageUri = resolver.insert(imageCollection, contentValues)
@@ -21,9 +34,6 @@
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
                 }
                 outputStream?.close()
-
-                // Update fileMedia
-                fileMedia = imageUri.toString()
 
                 // Notify the user
                 Toast.makeText(this, "Success ${imageUri.path}", Toast.LENGTH_LONG).show()
