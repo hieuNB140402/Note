@@ -1,0 +1,44 @@
+dialogLoad.show()
+                    val handleExceptionCoroutine = CoroutineExceptionHandler { _, throwable ->
+                        Log.d("asdf", throwable.message.toString())
+                    }
+
+                    val scope =
+                        CoroutineScope(SupervisorJob() + Dispatchers.IO + handleExceptionCoroutine).launch {
+                            val job1 = async {
+                                for (i in 0 until originBimap.size) {
+                                    val bitmap =
+                                        Glide.with(this@CustomActivity).load(originBimap[i])
+                                            .submit().get().toBitmap()
+                                    val bm = setFilter(pos, bitmap)
+                                    val randomString = UUID.randomUUID().toString()
+                                    val filePath = bitmapToFile(
+                                        this@CustomActivity,
+                                        bm ?: bitmap,
+                                        randomString
+                                    )
+                                    allFilePath.add(filePath!!)
+                                }
+                                return@async (allFilePath.size == originBimap.size)
+                            }
+
+                            val job2 = async {
+                                if (job1.await()){
+                                    for (i in 0 until originBimap.size) {
+                                        mSelectedTemplateItem!!.photoItemList[i].imagePath =
+                                            allFilePath[i]
+                                    }
+                                }
+                                return@async true
+                            }
+
+                            launch(Dispatchers.Main) {
+                                if (job2.await()) {
+                                    dialogLoad.dismiss()
+                                }
+                            }
+                        }
+
+                    scope.invokeOnCompletion {
+                        buildLayout(mSelectedTemplateItem)
+                    }
